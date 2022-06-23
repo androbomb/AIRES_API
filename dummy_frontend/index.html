@@ -15,14 +15,24 @@
         <button id="uploadButton">upload</button>
     </div>
     
-    
-    <div id="imageDiv" style="display: inline-block; vertical-align: middle; line-height: 1; padding-top: 50px;">
-        
+    <hr>
+    <div id="imageDiv_Flask" style="display: inline-block; vertical-align: middle; line-height: 1; padding-top: 50px;">
+        <h4>
+            Flask
+        </h4>
+    </div>
+
+    <hr>
+    <div id="imageDiv_FastAPI" style="display: inline-block; vertical-align: middle; line-height: 1; padding-top: 50px;">
+        <h4>
+            FastAPI
+        </h4>
     </div>
     
     
     <script>
-    const resultsContainer = document.getElementById("imageDiv");
+    const resultsContainer_FastAPI = document.getElementById("imageDiv_FastAPI");
+    const resultsContainer_Flask   = document.getElementById("imageDiv_Flask");
 
     // UPLOAD
     document.getElementById("uploadButton").onclick = async () => {
@@ -39,7 +49,72 @@
         let formData = new FormData();
         formData.set('file', file);
         
+        // FastAPI - BEGIN
+
         //2D
+        const startTime_FastAPI_2D = performance.now()
+        const startTime_FastAPI_1D = performance.now()
+
+        axios.post("https://172.16.5.30:8443/fastapi_aires/color2D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            resultsContainer_FastAPI.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+            const endTime_FastAPI_2D = performance.now()
+            resultsContainer_FastAPI.innerHTML += `
+                <p>
+                    Call to FastAPI 2D took ${endTime_FastAPI_2D - startTime_FastAPI_2D} milliseconds
+                </p>
+            ` 
+        }) 
+        // 1D
+        axios.post("https://172.16.5.30:8443/fastapi_aires/color1D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            resultsContainer_FastAPI.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+            const endTime_FastAPI_1D = performance.now()
+            resultsContainer_FastAPI.innerHTML += `
+                <p>
+                    Call to FastAPI 1D took ${endTime_FastAPI_1D - startTime_FastAPI_1D} milliseconds
+                </p>
+            ` 
+        }) 
+
+        // FastAPI - END
+
+        // Flask - BEGIN
+
+        //2D
+        const startTime_Flask_2D = performance.now()
+        const startTime_Flask_1D = performance.now()
+
         axios.post("https://172.16.5.30:8443/flask_aires/color2D", formData, {
             crossDomain: true,
             headers: {
@@ -55,8 +130,14 @@
         })
         .then(res => {
             console.log(res)
-            resultsContainer.innerHTML += `
+            resultsContainer_Flask.innerHTML += `
                 <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+            const endTime_Flask_2D = performance.now()
+            resultsContainer_Flask.innerHTML += `
+                <p>
+                    Call to Flask 2D took ${endTime_Flask_2D - startTime_Flask_2D} milliseconds
+                </p>
             ` 
         }) 
         // 1D
@@ -75,10 +156,22 @@
         })
         .then(res => {
             console.log(res)
-            resultsContainer.innerHTML += `
+            resultsContainer_Flask.innerHTML += `
                 <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
             ` 
+            const endTime_Flask_1D = performance.now()
+            resultsContainer_Flask.innerHTML += `
+                <p>
+                    Call to Flask 1D took ${endTime_Flask_1D - startTime_Flask_1D} milliseconds
+                </p>
+            ` 
         }) 
+
+        
+        
+
+        // Flask - END
+        
 
         
 
