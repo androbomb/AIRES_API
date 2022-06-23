@@ -1,0 +1,44 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_tokens off;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
+
+# main server block
+server {
+    listen 8443 ssl http2 default_server;
+    listen [::]:8443 ssl http2 default_server;
+    server_tokens off;
+    server_name _;
+
+    # all ssl related config moved to ssl.conf
+    include /config/nginx/ssl.conf;
+
+    # include all location conf
+    #include locations/*.conf.template; #include locations/*.conf
+
+    # FLASK
+    location ${FLASK_BASE_URL}/ {
+
+        proxy_pass              ${NGINX_PROXY_PASS_FLASK}:${FLASK_PORT};
+
+        proxy_set_header        X-Real-IP $remote_addr;
+
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-Host $host:$server_port;
+        proxy_set_header        X-Forwarded-Server $host;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto https;
+        proxy_redirect          http:// https://;
+
+        client_max_body_size    0;
+    }
+}
+
+# enable subdomain method reverse proxy confs
+include /config/nginx/proxy-confs/*.subdomain.conf;
+# enable proxy cache for auth
+proxy_cache_path cache/ keys_zone=auth_cache:10m;

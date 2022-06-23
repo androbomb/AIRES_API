@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dummy Front End</title>
+    <script src="	https://unpkg.com/axios@0.24.0/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <input type="file" id="fileInput" accept=".h5">
+        <button id="uploadButton">upload</button>
+    </div>
+    
+    
+    <div id="imageDiv" style="display: inline-block; vertical-align: middle; line-height: 1; padding-top: 50px;">
+        
+    </div>
+    
+    
+    <script>
+    const resultsContainer = document.getElementById("imageDiv");
+
+    // UPLOAD
+    document.getElementById("uploadButton").onclick = async () => {
+        let fileElement = document.getElementById('fileInput')
+
+        // check if user had selected a file
+        if (fileElement.files.length === 0) {
+            alert('please choose a file')
+            return
+        }
+
+        let file = fileElement.files[0]
+
+        let formData = new FormData();
+        formData.set('file', file);
+        
+        //2D
+        axios.post("https://172.16.5.30:8443/flask_aires/color2D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            resultsContainer.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+        }) 
+        // 1D
+        axios.post("https://172.16.5.30:8443/flask_aires/color1D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            resultsContainer.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+        }) 
+
+        
+
+    }
+
+    // SHOW IMAGE function
+
+    </script>
+</body>
+
+</html>

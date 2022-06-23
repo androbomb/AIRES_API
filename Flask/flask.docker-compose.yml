@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  aires_flask_app:
+    image: aires_flask_app_image
+    container_name: aires_flask_app
+    restart: always
+    env_file:
+      - .env
+    build: 
+      context: ${FLASK_ROOT_DIR}
+      dockerfile: ${FLASK_ROOT_DIR}/flask.Dockerfile
+    ports:
+      - "${FLASK_PORT}:${FLASK_PORT}"
+    volumes:
+      - ${PATH_TO_AIRES_MODELS}:${WORKDIR_PATH}/AIRES_MODELS/
