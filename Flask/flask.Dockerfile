@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM python:3.8-slim-buster
 
-LABEL maintainer="alessandro.bombini.fi@gmail.com"
+LABEL maintainer="bombini@fi.infn.it"
 
 ENV WORKDIR_PATH /flask_app
 WORKDIR $WORKDIR_PATH

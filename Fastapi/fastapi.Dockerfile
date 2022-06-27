@@ -1,6 +1,6 @@
 FROM python:3.9-slim-buster
 
-LABEL maintainer="alessandro.bombini.fi@gmail.com"
+LABEL maintainer="bombini@fi.infn.it"
 
 ENV FASTAPI_WORKDIR_PATH /fastapi_app
 WORKDIR $FASTAPI_WORKDIR_PATH
