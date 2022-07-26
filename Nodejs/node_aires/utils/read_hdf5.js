@@ -30,7 +30,8 @@ async function read_h5_jsfive(file) {
     const hdf5 = await import("jsfive");
     const Buffer = require('node:buffer');
     // PArsing req
-    const filename = file.originalname;
+    let date = new Date();
+    const filename = date.now() + '_' +  file.originalname ;
     const buffer = await Buffer.Buffer.from(file.buffer);
     const arrayBuf = fromBufferToArrayBuffer(buffer);
     console.log(`Array buffer created.`)
@@ -57,7 +58,9 @@ async function read_h5_h5wasm(file) {
     await hdf5.ready;
     const Buffer = require('node:buffer');
     // PArsing req
-    const data_filename = file.originalname;
+    let date = new Date();
+    const data_filename = date.getTime() + '_' +  file.originalname ;
+    //const data_filename = file.originalname;
     const buffer = await Buffer.Buffer.from(file.buffer);
     const ab = buffer;
     //Init h5 file

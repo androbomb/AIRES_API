@@ -26,6 +26,7 @@ const cors = require('cors');
 // Custom imports
 const read_h5 = require('./utils/read_hdf5');
 const function_1D = require('./utils/function_1d');
+const function_2D = require('./utils/function_2d');
 const parse_jpg = require('./utils/parse_jpg');
 const utils = require('./utils/other_functions');
 
@@ -88,164 +89,213 @@ router.get('/',
     }
 );
 
-// 2D
-router.post('/color2D', 
-    upload, 
-    async (req, res, err) => { 
-        // Error handling
-        /* if (err instanceof multer.MulterError) {
-            // A Multer error occurred when uploading.
-            res.status(400).send(`Multer Error while uploading file;\n${err}\nHave you sent the file as 'file'?\n`);
-            return;
-        } else if (err) {
-            // An unknown error occurred when uploading.
-            res.status(400).send(`Node Error while uploading file;\n${err}\n`);
-            return ;
-        } */
-        
-        // No error; continue;
-        console.log('1D Path;\n\n')
-        // Read file
-        let _f; 
-        let _filename;
-
-        if (req.file) {
-            _f = req.file;            
-        } else if (req.files) {
-            _f = req.files[0];
-        } else {
-            // No files
-            res.status(200).send("No files sent");
-        }
-        // File name
-        _filename = _f.originalname;
-        console.log(`Analysing file ${_filename}`)
-
-        console.log(`Uploaded ${_filename}; start processing...`)
-        
-        // Parse hdf5 
-        try {
-            const xrf = await read_h5.read_h5(_f);
-            console.log(xrf);
-            try {
-                console.log('Applying TF model')
-            } catch (error) {
-                console.log(`Error while interpreting tensor;\n${error}\n`)
-                res.status(400).send(`Error while interpreting tensor;\n${error}\n`);
-                return;
-            }
-
-        } catch (error) {
-            console.log(`Error while parsing hdf5;\n${error}\n`)
-            res.status(400).send(`Error while parsing hdf5;\n${error}\n`);
-            return;
-        }
-        
-        /* let xrf = tf.tensor(
-            
-        ); */
-        // obtain recolored
-
-
-        // remove in the end
-        res.status(200).send("Done!\n");
-    }
-)
-
 // 1D
 router.post('/color1D', 
     upload, 
     async (req, res, err) => { 
-        console.log('1D Path;\n\n')
-        // Read file
-        let _f; 
-        let _filename;
-
-        if (req.file) {
-            _f = req.file;            
-        } else if (req.files) {
-            _f = req.files[0];
-        } else {
-            // No files
-            res.status(200).send("No files sent");
-            return;
-        }
-        // File name
-        _filename = _f.originalname;
-        console.log(`Analysing file ${_filename}`)
-
-        console.log(`Uploaded ${_filename}; start processing...`)
-        
-        // Handle 1D
-        let img = await function_1D.handle_1d_recoloring(_f);
-        img_shape = img.shape;
-        console.log(`Returing img of shape ${img.shape}`)
-        console.log(typeof img)
-        console.log(`Average color: ${img.mean()}\nin 255 scale: ${tf.mul(255, img.mean())}`)
-        
-        // If img is a string, IT IS AN ERROR
-        if (typeof img == "string") {
-            res.status(400).send(`${img}`);
-            return;
-        }   
-        
-        // Store tensor -- DEBUG ONLY --
-        //function_1D.storeTfTensor(img); // <<<<< OK
-
-        let content = await tf.browser.toPixels(img);
-        
-        // Store arr -- DEBUG ONLY --
-        //utils.storeUintArr(content);
-
-        content = parse_jpg.uint8ClampedArrayToImage(
-            input     = content, 
-            _width    = img_shape[1], 
-            _height   = img_shape[0], 
-            _channels = 4, 
-        );
-
-
-        // Store image -- DEBUG ONLY --
-        //parse_jpg.storeImg(content);
-
-        // Create reply
         try {
-            let img_filename = _filename.split('.')[0] + '.jpg';
-            console.log(`Returning ${img_filename}`)
-            let mimetype = 'image/jpeg';
-            res.status(200);
-            res.set({
-                'Content-Type': mimetype,
-                'Content-disposition': 'attachment;filename=' + img_filename,
-                'Content-Length': content.length
-            });
-            // Send file as base64 
-            const fileContents = content.jpeg().toBuffer()
-            .then(
-                (data) => {
-                    const base64Data = data.toString('base64');
+            console.log('1D Path;\n\n')
+            // Read file
+            let _f; 
+            let _filename;
 
-                    res.send(base64Data);
-                    return;
-                }
-            ).catch(
-                (error) => {
-                    let err_mess = `Error while sending file;\n${error}`;
-                    console.log(err_mess)
-                    res.status(400).send(err_mess);
-                    return;
-                }
-            );
+            if (req.file) {
+                _f = req.file;            
+            } else if (req.files) {
+                _f = req.files[0];
+            } else {
+                // No files
+                res.status(200).send("No files sent");
+                return;
+            }
+            // File name
+            _filename = _f.originalname;
+            console.log(`Analysing file ${_filename}`)
+
+            console.log(`Uploaded ${_filename}; start processing...`)
             
+            // Handle 1D
+            let img = await function_1D.handle_1d_recoloring(_f);
+            img_shape = img.shape;
+            console.log(`Returing img of shape ${img.shape}`)
+            console.log(typeof img)
+            console.log(`Average color: ${img.mean()}\nin 255 scale: ${tf.mul(255, img.mean())}`)
+            
+            // If img is a string, IT IS AN ERROR
+            if (typeof img == "string") {
+                res.status(400).send(`${img}`);
+                return;
+            }   
+            
+            // Store tensor -- DEBUG ONLY --
+            //function_1D.storeTfTensor(img); // <<<<< OK
+
+            let content = await tf.browser.toPixels(img);
+            
+            // Store arr -- DEBUG ONLY --
+            //utils.storeUintArr(content);
+
+            content = parse_jpg.uint8ClampedArrayToImage(
+                input     = content, 
+                _width    = img_shape[1], 
+                _height   = img_shape[0], 
+                _channels = 4, 
+            );
+
+
+            // Store image -- DEBUG ONLY --
+            //parse_jpg.storeImg(content);
+
+            // Create reply
+            try {
+                let img_filename = _filename.split('.')[0] + '.jpg';
+                console.log(`Returning ${img_filename}`)
+                let mimetype = 'image/jpeg';
+                res.status(200);
+                res.set({
+                    'Content-Type': mimetype,
+                    'Content-disposition': 'attachment;filename=' + img_filename,
+                    'Content-Length': content.length
+                });
+                // Send file as base64 
+                const fileContents = content.jpeg().toBuffer()
+                .then(
+                    (data) => {
+                        const base64Data = data.toString('base64');
+
+                        res.send(base64Data);
+                        return;
+                    }
+                ).catch(
+                    (error) => {
+                        let err_mess = `Error while sending file;\n${error}`;
+                        console.log(err_mess)
+                        res.status(400).send(err_mess);
+                        return;
+                    }
+                );
+                
+            } catch (error) {
+                let err_mess = `Error while sending file;\n${error}`;
+                console.log(err_mess)
+                res.status(400).send(err_mess);
+                return;
+            }
+            
+            console.log('Done.')
+            return;
         } catch (error) {
-            let err_mess = `Error while sending file;\n${error}`;
+            let err_mess = `Error in app 1D;\n${error}`;
             console.log(err_mess)
             res.status(400).send(err_mess);
             return;
         }
         
-        console.log('Done.')
-        return;
+    }
+)
+
+// 2D
+router.post('/color2D', 
+    upload, 
+    async (req, res, err) => { 
+        try {
+            console.log('2D Path;\n\n')
+            // Read file
+            let _f; 
+            let _filename;
+
+            if (req.file) {
+                _f = req.file;            
+            } else if (req.files) {
+                _f = req.files[0];
+            } else {
+                // No files
+                res.status(200).send("No files sent");
+                return;
+            }
+            // File name
+            _filename = _f.originalname;
+            console.log(`Analysing file ${_filename}`)
+
+            console.log(`Uploaded ${_filename}; start processing...`)
+            
+            // Handle 2D
+            let img = await function_2D.handle_2d_recoloring(_f);
+            img_shape = img.shape;
+            console.log(`Returing img of shape ${img.shape}`)
+            console.log(typeof img)
+            console.log(`Average color: ${img.mean()}\nin 255 scale: ${tf.mul(255, img.mean())}`)
+            
+            // If img is a string, IT IS AN ERROR
+            if (typeof img == "string") {
+                res.status(400).send(`${img}`);
+                return;
+            }   
+            
+            // Store tensor -- DEBUG ONLY --
+            //function_1D.storeTfTensor(img); // <<<<<
+
+            let content = await tf.browser.toPixels(img);
+            
+            // Store arr -- DEBUG ONLY --
+            //utils.storeUintArr(content);
+
+            content = parse_jpg.uint8ClampedArrayToImage(
+                input     = content, 
+                _width    = img_shape[1], 
+                _height   = img_shape[0], 
+                _channels = 4, 
+            );
+
+
+            // Store image -- DEBUG ONLY --
+            //parse_jpg.storeImg(content);
+
+            // Create reply
+            try {
+                let img_filename = _filename.split('.')[0] + '.jpg';
+                console.log(`Returning ${img_filename}`)
+                let mimetype = 'image/jpeg';
+                res.status(200);
+                res.set({
+                    'Content-Type': mimetype,
+                    'Content-disposition': 'attachment;filename=' + img_filename,
+                    'Content-Length': content.length
+                });
+                // Send file as base64 
+                const fileContents = content.jpeg().toBuffer()
+                .then(
+                    (data) => {
+                        const base64Data = data.toString('base64');
+
+                        res.send(base64Data);
+                        return;
+                    }
+                ).catch(
+                    (error) => {
+                        let err_mess = `Error while sending file;\n${error}`;
+                        console.log(err_mess)
+                        res.status(400).send(err_mess);
+                        return;
+                    }
+                );
+                
+            } catch (error) {
+                let err_mess = `Error while sending file;\n${error}`;
+                console.log(err_mess)
+                res.status(400).send(err_mess);
+                return;
+            }
+            
+            console.log('Done.')
+            return;
+        } catch (error) {
+            let err_mess = `Error in app 2D;\n${error}`;
+            console.log(err_mess)
+            res.status(400).send(err_mess);
+            return;
+        }
+        
     }
 )
 
