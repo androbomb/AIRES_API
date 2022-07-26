@@ -54,6 +54,24 @@ server {
 
         client_max_body_size    0;
     }
+
+    # NODEJS
+    location ${NODE_BASE_URL}/ {
+
+        proxy_pass              ${NGINX_PROXY_PASS_NODE}:${NODE_PORT};
+
+        proxy_set_header        X-Real-IP $remote_addr;
+
+        proxy_set_header        Host $host;
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-Host $host:$server_port;
+        proxy_set_header        X-Forwarded-Server $host;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto https;
+        proxy_redirect          http:// https://;
+
+        client_max_body_size    0;
+    }
 }
 
 # enable subdomain method reverse proxy confs

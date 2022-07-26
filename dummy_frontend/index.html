@@ -29,10 +29,29 @@
         </h4>
     </div>
     
+    <hr>
+    <div id="imageDiv_Node" style="display: inline-block; vertical-align: middle; line-height: 1; padding-top: 50px;">
+        <h4>
+            Node
+        </h4>
+    </div>
+    
     
     <script>
     const resultsContainer_FastAPI = document.getElementById("imageDiv_FastAPI");
     const resultsContainer_Flask   = document.getElementById("imageDiv_Flask");
+    const resultsContainer_Node  = document.getElementById("imageDiv_Node");
+
+    /* const base64Arraybuffer = async (data) => {
+        const base64url = await new Promise(
+            (r) => {
+                const reader = new FileReader();
+                reader.onload = () => r(reader.result);
+                reader.readAsDataURL(new Blob([data]));
+            }
+        );
+        return base64url.split(",", 2)[1];
+    }; */
 
     // UPLOAD
     document.getElementById("uploadButton").onclick = async () => {
@@ -172,7 +191,71 @@
 
         // Flask - END
         
+        // Nodejs - BEGIN
 
+        //2D
+        const startTime_Node_2D = performance.now()
+        const startTime_Node_1D = performance.now()
+
+        axios.post("https://172.16.5.30:8443/node_aires/color2D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            resultsContainer_Node.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            ` 
+            const endTime_Node_2D = performance.now()
+            resultsContainer_Node.innerHTML += `
+                <p>
+                    Call to Node 2D took ${endTime_Node_2D - startTime_Node_2D} milliseconds
+                </p>
+            ` 
+        }) 
+        // 1D "https://172.16.5.30:8443/node_aires/color1D"
+        axios.post("https://172.16.5.30:8443/node_aires/color1D", formData, {
+            crossDomain: true,
+            headers: {
+            'Content-Type': 'multipart/form-data'
+            },
+            responseType: 'image/jpeg',
+            onUploadProgress: progressEvent => {
+                const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+                );
+                console.log(`upload process: ${percentCompleted}%`);
+            }
+        })
+        .then(res => {
+            console.log(res)
+            //resultsContainer_Node.innerHTML += res.data; 
+            resultsContainer_Node.innerHTML += `
+                <img src="data:image/jpeg;base64,${res.data}" alt="recolored image" />
+            `;
+            const endTime_Node_1D = performance.now()
+            resultsContainer_Node.innerHTML += `
+                <p>
+                    Call to Node 1D took ${endTime_Node_1D - startTime_Node_1D} milliseconds
+                </p>
+            ` 
+        }) 
+
+        
+
+        
+        
+
+        // Node - END
         
 
     }
