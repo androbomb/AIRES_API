@@ -13,3 +13,5 @@ Keras
 Keras-Preprocessing
 tqdm
 Pillow
+
+prometheus_fastapi_instrumentator

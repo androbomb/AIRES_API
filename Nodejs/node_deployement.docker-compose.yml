@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  aires_node_app:
+    image: aires_node_app_image_dep
+    container_name: aires_node_app_dep
+    restart: always
+    env_file:
+      - .env
+    command: node server.js
+    build: 
+      context: ${NODE_ROOT_DIR}
+      dockerfile: ${NODE_ROOT_DIR}/node.Dockerfile
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
+    volumes:
+      - ${PATH_TO_AIRES_MODELS}:/home/node/app/aires_models
+      # For dev reasons:
+      - ${PATH_TO_NODE_APP}:/home/node/app
+      - node_modules:/home/node/app/node_modules
+# For dev reasons:
+volumes:
+  node_modules:

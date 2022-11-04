@@ -46,4 +46,4 @@ services:
       - "${FASTAPI_PORT}:${FASTAPI_PORT}"
     volumes:
       - ${PATH_TO_AIRES_MODELS}:${FASTAPI_WORKDIR_PATH}/AIRES_MODELS/
-  # CROW
+
